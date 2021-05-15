@@ -33,3 +33,6 @@ build/
 .vscode/
 
 .mvn
+i18n
+
+.DS_Store

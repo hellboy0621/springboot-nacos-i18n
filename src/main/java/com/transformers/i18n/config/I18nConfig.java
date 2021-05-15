@@ -1,25 +1,27 @@
 package com.transformers.i18n.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.servlet.LocaleResolver;
+
+import javax.annotation.Resource;
+import java.io.File;
 
 /**
  * @author daniel
  * @date 2021-05-15
  */
+@Slf4j
 @Configuration
 public class I18nConfig {
 
-    // 默认解析器
-//    @Bean
-//    public LocaleResolver localeResolver() {
-//        SessionLocaleResolver sessionLocaleResolver = new SessionLocaleResolver();
-//        sessionLocaleResolver.setDefaultLocale(Locale.CHINA);
-//        return sessionLocaleResolver;
-//    }
+    @Resource
+    private MessagesConfig messagesConfig;
 
     /**
      * 自定义解析器
@@ -31,13 +33,25 @@ public class I18nConfig {
         return new CustomLocaleResolver();
     }
 
-    /**
-     * 从国际化配置文件中获取所有的 key
-     *
-     * @return ResourceLoader
-     */
+    @Primary
     @Bean
-    public ResourceLoader resourceLoader() {
-        return new DefaultResourceLoader();
+    @DependsOn(value = "messagesConfig")
+    public ReloadableResourceBundleMessageSource messageSource() {
+        String path = ResourceUtils.FILE_URL_PREFIX
+                + System.getProperty("user.dir")
+                + File.separator
+                + messagesConfig.getBaseDir()
+                + File.separator
+                + messagesConfig.getBasename();
+
+        log.debug("messagesConfig {}", messagesConfig);
+        log.debug("path {}", path);
+
+        // 定时刷新配置文件
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename(path);
+        messageSource.setDefaultEncoding(messagesConfig.getEncoding());
+        messageSource.setCacheMillis(messagesConfig.getCacheMillis());
+        return messageSource;
     }
 }

@@ -1,38 +1,38 @@
 package com.transformers.i18n.util;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.io.IOUtils;
+import com.transformers.i18n.config.MessagesConfig;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
+ * 获取配置文件工具类
+ *
  * @author daniel
  * @date 2021-05-15
  */
 @Component
-public class MessageUtils {
+public final class MessageUtils {
 
     private static MessageSource messageSource;
 
-    private static ResourceLoader resourceLoader;
+    private static MessagesConfig messagesConfig;
 
-    public MessageUtils(MessageSource messageSource, ResourceLoader resourceLoader) {
+    public MessageUtils(MessageSource messageSource, MessagesConfig messagesConfig) {
         MessageUtils.messageSource = messageSource;
-        MessageUtils.resourceLoader = resourceLoader;
+        MessageUtils.messagesConfig = messagesConfig;
     }
 
     /**
      * 获取 key 对应的国际化 value
+     * 没有对应的key时，返回这个 key
      *
      * @param key 国际化 key
      * @return 国际化 value
@@ -53,13 +53,18 @@ public class MessageUtils {
      * @return Map<String, String>
      */
     public static Map<String, String> getProperties() {
-        Resource resource = resourceLoader.getResource("classpath:static/i18n/messages.properties");
+        String path = System.getProperty("user.dir")
+                + File.separator
+                + messagesConfig.getBaseDir();
+        String filePath = path
+                + File.separator
+                + messagesConfig.getBasename()
+                + ".properties";
+        File file = new File(filePath);
         final Map<String, String> map = Maps.newHashMap();
         try {
-            InputStream inputStream = resource.getInputStream();
-            String content = IOUtils.toString(inputStream, Charset.defaultCharset());
-
-            Stream.of(content.split("\n"))
+            Files.lines(file.toPath())
+                    .filter(line -> !line.startsWith("#"))
                     .filter(line -> line.contains("="))
                     .forEach(line -> {
                         String key = line.split("=")[0];

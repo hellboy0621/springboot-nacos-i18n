@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1
+        namespace: 77d40ebc-a868-4057-ae65-f3b53901a0cf
+  application:
+    name: springboot-nacos-i18n

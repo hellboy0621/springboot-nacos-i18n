@@ -34,3 +34,5 @@ build/
 
 .mvn
 i18n
+
+.DS_Store

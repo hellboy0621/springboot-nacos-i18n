@@ -1,0 +1,5 @@
+spring:
+  messages:
+    # 这里加了 classpath 反而报错，错误格式
+    # basename: classpath:static/i18n/messages
+    basename: static/i18n/messages
